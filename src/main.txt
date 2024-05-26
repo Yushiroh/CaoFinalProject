@@ -1,0 +1,56 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include "RTClib.h"
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <Keypad.h>
+
+const byte ROWS = 4; 
+const byte COLS = 4; 
+char hexaKeys[ROWS][COLS] = {
+  {'D','#','0','*'},
+  {'C','9','8','7'},
+  {'B','6','5','4'},
+  {'A','3','2','1'}
+};
+byte rowPins[ROWS] = {5, 4, 3, 2}; 
+byte colPins[COLS] = {9, 8, 7, 6}; 
+
+
+Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
+
+RTC_DS1307 rtc;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup () {
+  Serial.begin(57600);
+  
+  lcd.begin();
+	lcd.backlight();
+  lcd.print("Hello World!");
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+}
+
+void loop() {
+  DateTime time = rtc.now();
+
+  char customKey = customKeypad.getKey();
+  
+  if (customKey){
+    Serial.println(customKey);
+  }
+
+
+  String currentTime = String(time.timestamp(DateTime::TIMESTAMP_TIME));
+  Serial.println(currentTime);
+  if(currentTime == "01:20:00"){
+    Serial.println("GAGO!");
+  }else{
+    Serial.println("wala");
+  }
+}
